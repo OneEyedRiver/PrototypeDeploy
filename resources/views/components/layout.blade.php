@@ -8,11 +8,17 @@
         $manifest = json_decode(file_get_contents(public_path('build/manifest.json')), true);
     @endphp
 
-    <link rel="stylesheet" href="{{ secure_asset('build/' . $manifest['resources/css/app.css']['file']) }}">
-    <script type="module" src="{{ secure_asset('build/' . $manifest['resources/js/app.js']['file']) }}"></script>
+    {{-- <link rel="stylesheet" href="{{ secure_asset('build/' . $manifest['resources/css/app.css']['file']) }}">
+    <script type="module" src="{{ secure_asset('build/' . $manifest['resources/js/app.js']['file']) }}"></script> --}}
+
+
+    <link rel="stylesheet" href="{{ secure_asset('leaflet/leaflet.css') }}" />
+<script src="{{ secure_asset('leaflet/leaflet.js') }}"></script>
 
 {{-- @vite('resources/css/app.css')
              @vite('resources/js/app.js') --}}
+
+
 </head>
 <body class=" bg-gray-100">
 

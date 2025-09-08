@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Http\Middleware\IsAdmin;
 use App\Http\Middleware\IsUser;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -25,7 +26,11 @@ class AppServiceProvider extends ServiceProvider
             Route::aliasMiddleware('is_admin', IsAdmin::class);
             Route::aliasMiddleware('is_user', IsUser::class);
             Route::prefix('api')->middleware('api')->group(base_path('routes/api.php'));
+              if (config('app.env') === 'production') {
+        URL::forceScheme('https');
+    }
     }
 
+    
 
 }

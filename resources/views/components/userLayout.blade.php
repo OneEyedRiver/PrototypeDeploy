@@ -14,9 +14,11 @@
     @vite('resources/js/app.js') --}}
 
 <!-- Leaflet CSS & JS (local) -->
-<link rel="stylesheet" href="{{ asset('leaflet/leaflet.css') }}" />
-<script src="{{ asset('leaflet/leaflet.js') }}"></script>
+{{-- <link rel="stylesheet" href="{{ asset('leaflet/leaflet.css') }}" />
+<script src="{{ asset('leaflet/leaflet.js') }}"></script> --}}
 
+<link rel="stylesheet" href="{{ secure_asset('leaflet/leaflet.css') }}" />
+<script src="{{ secure_asset('leaflet/leaflet.js') }}"></script>
 
 
 
