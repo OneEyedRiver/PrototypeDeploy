@@ -8,17 +8,28 @@
         $manifest = json_decode(file_get_contents(public_path('build/manifest.json')), true);
     @endphp
 
-    <link rel="stylesheet" href="{{ secure_asset('build/' . $manifest['resources/css/app.css']['file']) }}">
-    <script type="module" src="{{ secure_asset('build/' . $manifest['resources/js/app.js']['file']) }}"></script>
-    {{-- @vite('resources/css/app.css')
-    @vite('resources/js/app.js') --}}
+
+
+    <link rel="stylesheet" href="{{ secure_asset('leaflet/leaflet.css') }}" />
+<script src="{{ secure_asset('leaflet/leaflet.js') }}"></script>
+
+  <link rel="stylesheet" href="{{ secure_asset('build/' . $manifest['resources/css/app.css']['file']) }}">
+    <script type="module" src="{{ secure_asset('build/' . $manifest['resources/js/app.js']['file']) }}"></script> 
+ 
+
+
+
+
 
 <!-- Leaflet CSS & JS (local) -->
 {{-- <link rel="stylesheet" href="{{ asset('leaflet/leaflet.css') }}" />
-<script src="{{ asset('leaflet/leaflet.js') }}"></script> --}}
+<script src="{{ asset('leaflet/leaflet.js') }}"></script>
+    @vite('resources/css/app.css')
+    @vite('resources/js/app.js') --}}
 
-<link rel="stylesheet" href="{{ secure_asset('leaflet/leaflet.css') }}" />
-<script src="{{ secure_asset('leaflet/leaflet.js') }}"></script>
+
+
+    <script src="//unpkg.com/alpinejs" defer></script>
 
 
 
@@ -36,33 +47,68 @@
 <h1 class="font-bold text-[20px] sm:text-[30px] mt-1">RIVER STORE</h1>
 
 
- @auth
-<!--Navigation -->
-<div class="flex justify-around gap-x-12"> 
+@auth
+<!--Mobile Dropdown Navigation-->
+<div class="sm:hidden relative" x-data="{ open: false }">
+  <!-- Dropdown button -->
+  <button @click="open = !open" 
+          class="bg-blue-600 text-white px-4 py-2 rounded-md focus:outline-none">
+    Menu
+  </button>
 
-<a href="{{ route('show.menu') }} " class="group inline-block">
-    <img src="{{ asset('images/home-icon.png') }}" alt="Clickable Image" class="group-hover:hidden w-12 h-12 transition">
-    <img src="{{ asset('images/home-icon-hover.png') }}" alt="Clickable Image" class="hidden group-hover:inline w-13 h-13 transition">
-</a>
-<a href="{{ route('user.fastSearch') }} " class="group inline-block">
-    <img src="{{ asset('images/fastSearch.png') }}" alt="Clickable Image" class="group-hover:hidden w-12 h-12 transition">
-    <img src="{{ asset('images/fastSearch-hover.png') }}" alt="Clickable Image" class="hidden group-hover:inline w-13 h-13 transition">
-</a>
-<a href="{{ route('user.fastSearchGroup') }} " class="group inline-block">
-    <img src="{{ asset('images/fastSearch.png') }}" alt="Clickable Image" class="group-hover:hidden w-12 h-12 transition">
-    <img src="{{ asset('images/fastSearch-hover.png') }}" alt="Clickable Image" class="hidden group-hover:inline w-13 h-13 transition">
-</a>
-<a href="{{ route('cart.userCart') }} " class="group inline-block">
-    <img src="{{ asset('images/cart.png') }}" alt="Clickable Image" class="group-hover:hidden w-12 h-12 transition">
-    <img src="{{ asset('images/cart-hover.png') }}" alt="Clickable Image" class="hidden group-hover:inline w-13 h-13 transition">
-</a>
-<a href="{{ route('user.sellView') }} " class="group inline-block">
-    <img src="{{ asset('images/add-icon.png') }}" alt="Clickable Image" class="group-hover:hidden w-12 h-12 transition">
-    <img src="{{ asset('images/add-icon-hover.png') }}" alt="Clickable Image" class="hidden group-hover:inline w-13 h-13 transition">
-</a>
+  <!-- Dropdown menu -->
+  <div x-show="open" 
+       x-transition
+       @click.away="open = false"
+       class="absolute mt-2 w-48 bg-white border border-gray-300 rounded-lg shadow-lg flex flex-col gap-2 p-2 z-50">
+    <a href="{{ route('show.menu') }}" class="flex items-center gap-2">
+      <img src="{{ asset('images/home-icon.png') }}" class="w-5 h-5" alt="Home">
+      Menu
+    </a>
+    <a href="{{ route('user.fastSearch') }}" class="flex items-center gap-2">
+      <img src="{{ asset('images/fastSearch.png') }}" class="w-5 h-5" alt="Fast Search">
+      Fast Search
+    </a>
+    <a href="{{ route('user.fastSearchGroup') }}" class="flex items-center gap-2">
+      <img src="{{ asset('images/fastSearch.png') }}" class="w-5 h-5" alt="Fast Search Group">
+      Fast Search Group
+    </a>
+    <a href="{{ route('cart.userCart') }}" class="flex items-center gap-2">
+      <img src="{{ asset('images/cart.png') }}" class="w-5 h-5" alt="Cart">
+      Cart
+    </a>
+    <a href="{{ route('user.sellView') }}" class="flex items-center gap-2">
+      <img src="{{ asset('images/add-icon.png') }}" class="w-5 h-5" alt="Sell">
+      Sell
+    </a>
+  </div>
 </div>
-<!--Navigation -->
-  @endauth
+
+<!--Desktop Navigation-->
+<div class="hidden sm:flex justify-around gap-x-12">
+  <a href="{{ route('show.menu') }}" class="group inline-block">
+    <img src="{{ asset('images/home-icon.png') }}" class="group-hover:hidden w-12 h-12 transition">
+    <img src="{{ asset('images/home-icon-hover.png') }}" class="hidden group-hover:inline w-13 h-13 transition">
+  </a>
+  <a href="{{ route('user.fastSearch') }}" class="group inline-block">
+    <img src="{{ asset('images/fastSearch.png') }}" class="group-hover:hidden w-12 h-12 transition">
+    <img src="{{ asset('images/fastSearch-hover.png') }}" class="hidden group-hover:inline w-13 h-13 transition">
+  </a>
+  <a href="{{ route('user.fastSearchGroup') }}" class="group inline-block">
+    <img src="{{ asset('images/fastSearch.png') }}" class="group-hover:hidden w-12 h-12 transition">
+    <img src="{{ asset('images/fastSearch-hover.png') }}" class="hidden group-hover:inline w-13 h-13 transition">
+  </a>
+  <a href="{{ route('cart.userCart') }}" class="group inline-block">
+    <img src="{{ asset('images/cart.png') }}" class="group-hover:hidden w-12 h-12 transition">
+    <img src="{{ asset('images/cart-hover.png') }}" class="hidden group-hover:inline w-13 h-13 transition">
+  </a>
+  <a href="{{ route('user.sellView') }}" class="group inline-block">
+    <img src="{{ asset('images/add-icon.png') }}" class="group-hover:hidden w-12 h-12 transition">
+    <img src="{{ asset('images/add-icon-hover.png') }}" class="hidden group-hover:inline w-13 h-13 transition">
+  </a>
+</div>
+@endauth
+
 
 
    @guest

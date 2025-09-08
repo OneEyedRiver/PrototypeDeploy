@@ -1,86 +1,77 @@
-<x-userLayout>
+  <x-userLayout>
   <!-- search -->
-    <div class="max-w-3xl mx-auto my-6 p-4 border border-gray-300 rounded-2xl shadow-md bg-white">
-    <div class="flex items-center gap-3">
-        <!-- Search Form -->
-        <form action="/api/describe-dish" method="POST"  class="flex-1">
-            @csrf
-            <label for="search" class="sr-only">Search</label>
-            <div class="relative">
-                <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
-                    <svg class="w-5 h-5 text-gray-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
-                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                              d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
-                    </svg>
-                </div>
-             <input type="text" id="search1" name="search1" class="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500" placeholder="Search Product Location" />
-             <div class="flex">
-            <div class="absolute inset-y-0 end-2 flex items-center gap-2">
-                <button type="button" id="btn_add"
-                        class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none
-                               focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 transition">
-                    Add
-                </button>
+  <div class="max-w-3xl mx-auto my-6 p-4 border border-gray-300 rounded-2xl shadow-md bg-white">
+    <div class="flex flex-col sm:flex-row sm:items-center gap-3">
+      <!-- Search Form -->
+      <form action="/api/describe-dish" method="POST" class="flex-1 w-full relative">
+        @csrf
+        <label for="search1" class="sr-only">Search</label>
+        <div class="relative w-full">
+          <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+            <svg class="w-5 h-5 text-gray-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                    d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
+            </svg>
+          </div>
+          <input type="text" id="search1" name="search1" 
+                 class="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 
+                        focus:ring-blue-500 focus:border-blue-500" 
+                 placeholder="Search Product Location" />
+          
+          <div class="absolute inset-y-0 end-0 flex items-center gap-2">
+            <button type="button" id="btn_add"
+                    class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none
+                           focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 transition">
+              Add
+            </button>
 
-                <button type="button" id="btn_ingre"
-                        class="text-white bg-red-600 hover:bg-red-700 focus:ring-4 focus:outline-none
-                               focus:ring-red-300 font-medium rounded-lg text-sm px-4 py-2 transition">
-                    Ingredients
-                </button>
+            <button type="button" id="btn_ingre"
+                    class="text-white bg-red-600 hover:bg-red-700 focus:ring-4 focus:outline-none
+                           focus:ring-red-300 font-medium rounded-lg text-sm px-4 py-2 transition">
+              Ingredients
+            </button>
+          </div>
+        </div>
+      </form>
 
-                
-            </div>
-            </div>
-            </div>
-        </form>
+      <!-- Image Upload -->
+      <form id="uploadForm" action="/api/upload-image" method="POST" enctype="multipart/form-data" class="w-full sm:w-auto">
+        @csrf
+        <label for="imageInput" 
+               class="cursor-pointer flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-3 rounded-lg font-medium shadow-md transition w-full sm:w-auto">
+          <svg class="w-5 h-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                  d="M12 4v16m8-8H4" />
+          </svg>
+          Image
+        </label>
+        <input type="file" id="imageInput" name="image" class="hidden" required>
+      </form>
 
-        <!-- Image Upload as Button -->
-        <form id="uploadForm" action="/api/upload-image" method="POST" enctype="multipart/form-data">
-            @csrf
-            <label for="imageInput" 
-                   class="cursor-pointer flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-3 rounded-lg font-medium shadow-md transition">
-                <svg class="w-5 h-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                          d="M12 4v16m8-8H4" />
-                </svg>
-                Image
-            </label>
-            <input type="file" id="imageInput" name="image" class="hidden" required>
-        </form>
-         <form id="uploadForm1" action="/api/describe-audio" method="POST" enctype="multipart/form-data">
-            @csrf
-            <label for="audioInput" 
-                   class="cursor-pointer flex items-center gap-2 bg-purple-500 hover:bg-purple-600 text-white px-4 py-3 rounded-lg font-medium shadow-md transition">
-                <svg class="w-5 h-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                          d="M12 4v16m8-8H4" />
-                </svg>
-                Voice
-            </label>
-            <input type="file" name="audio" id="audioInput" accept="audio/*" class="hidden"  required>
-        </form>
+      <!-- Audio Upload -->
+      <form id="uploadForm1" action="/api/describe-audio" method="POST" enctype="multipart/form-data" class="w-full sm:w-auto">
+        @csrf
+        <label for="audioInput" 
+               class="cursor-pointer flex items-center justify-center gap-2 bg-purple-500 hover:bg-purple-600 text-white px-4 py-3 rounded-lg font-medium shadow-md transition w-full sm:w-auto">
+          <svg class="w-5 h-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                  d="M12 4v16m8-8H4" />
+          </svg>
+          Voice
+        </label>
+        <input type="file" name="audio" id="audioInput" accept="audio/*" class="hidden" required>
+      </form>
     </div>
-     <div id="tags_container" class="mt-3">
 
+    <!-- Tags Container -->
+    <div id="tags_container" class="mt-3"></div>
 
-
-     </div>
-
-     <div id="clearTagsContainer" class="my-2" style="display: none;">
-    <button id="btn_clearTags" class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600">
+    <div id="clearTagsContainer" class="my-2" style="display: none;">
+      <button id="btn_clearTags" class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600">
         Clear All Tags
-    </button>
-</div>
-
-</div>
-
-    
-
-
-
-       
-
-
+      </button>
+    </div>
+  </div>
 
 
 
