@@ -5,8 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password as RulesPassword;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Validator;
 
 class AuthController extends Controller
 {
@@ -108,4 +110,102 @@ class AuthController extends Controller
 
         
     }
+
+
+
+
+
+
+    
+    public function registerApi(Request $request){
+           $validate= Validator::make($request->all(),[
+             'f_name'=>'required|max:255|min:2',
+            'l_name'=>'required|max:255|min:2',
+            'username'=>'required|max:255|min:2|unique:users',
+
+            'email'=> 'required|email|unique:users',
+
+            'address_line_1'=>'max:100|min:5',
+            'address_line_2'=>'max:100|min:0',
+            'city'=>'max:50|min:2',
+            'state'=>'max:50|min:2',
+            'postal_code'=>'max:10|min:5',
+            'country'=>'max:50|min:2',
+
+            'phone_number' => 'string|min:10|max:20||unique:users|regex:/^[\d\s\+\-]+$/',
+
+            'password' => ['required', 'confirmed', RulesPassword::min(8)
+            ->mixedCase()
+            ->letters()
+            ->numbers()
+            ->symbols()
+            ->uncompromised(),
+            
+                        ],
+           ]);
+         
+
+
+        if($validate->fails()){
+             return response()->json(
+                ["Status"=>"error",
+                "message" =>$validate->errors()->getMessages()
+            ], status:200);
+        }
+       $validated=$validate->validated();
+
+
+        $user= new User();
+        $user->f_name= $validated['f_name'];
+        $user->l_name= $validated['l_name'];
+        $user->username= $validated['username'];
+        $user->email= $validated['email'];
+        $user->phone_number= $validated['phone_number'];
+        $user->password= Hash::make($validated['password']);
+     
+        if($user->save()){
+               return response()->json(
+                ["Status"=>"Success",
+                "message" =>"Success created"
+            ], status:200);
+        }
+            return response()->json(
+                ["Status"=>"error",
+                "message" =>"Unknown Error"
+            ], status:200);
+
+
+    }
+
+
+
+ 
+public function loginApi(Request $request)
+{
+    $validated = $request->validate([
+        'email' => 'required|email',
+        'password' => 'required|string',
+    ]);
+
+    $user = User::where('email', $validated['email'])->first();
+
+    if(!$user || !Hash::check($validated['password'], $user->password)){
+        return response()->json([
+            'Status' => 'error',
+            'message' => 'Invalid credentials'
+        ], 401);
+    }
+
+    $token = $user->createToken('mobile_token')->plainTextToken;
+
+    return response()->json([
+        'Status' => 'success',
+        'data' => [
+            'user' => $user,
+            'token' => $token
+        ],
+        'message' => 'Logged in Successfully'
+    ], 200);
+}
+
 }
