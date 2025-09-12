@@ -149,6 +149,8 @@
 
     <script>
      var map = L.map('map').setView([12.8797, 121.7740], 6); // Default PH view
+     const latInput = document.getElementById('latitude');
+    const lngInput = document.getElementById('longitude');
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 19,
@@ -160,36 +162,46 @@
     var userLat = sessionStorage.getItem('userLat') ? parseFloat(sessionStorage.getItem('userLat')) : null;
     var userLng = sessionStorage.getItem('userLng') ? parseFloat(sessionStorage.getItem('userLng')) : null;
 
-    function requestUserLocation() {
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(function(position) {
-                userLat = position.coords.latitude;
-                userLng = position.coords.longitude;
+ function requestUserLocation() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(function(position) {
+            userLat = position.coords.latitude;
+            userLng = position.coords.longitude;
 
-                // Save in sessionStorage
-                sessionStorage.setItem('userLat', userLat);
-                sessionStorage.setItem('userLng', userLng);
+            // Save in sessionStorage
+            sessionStorage.setItem('userLat', userLat);
+            sessionStorage.setItem('userLng', userLng);
 
-                if (!userMarker) {
-                    userMarker = L.marker([userLat, userLng], {
-                        icon: L.icon({
-                            iconUrl: "https://maps.google.com/mapfiles/ms/icons/green-dot.png",
-                            iconSize: [32, 32]
-                        })
-                    }).addTo(map).bindPopup("📍 You are here");
-                } else {
-                    userMarker.setLatLng([userLat, userLng]);
-                }
+            // ✅ Update or add user marker on the map
+            if (!userMarker) {
+                userMarker = L.marker([userLat, userLng], {
+                    icon: L.icon({
+                        iconUrl: "https://maps.google.com/mapfiles/ms/icons/green-dot.png",
+                        iconSize: [32, 32]
+                    })
+                }).addTo(map).bindPopup("📍 You are here");
+            } else {
+                userMarker.setLatLng([userLat, userLng]);
+            }
 
-                userMarker.openPopup();
-                map.setView([userLat, userLng], 13);
-            }, function() {
-                console.warn("Geolocation blocked or unavailable.");
-            });
-        } else {
-            console.warn("Geolocation not supported by browser.");
-        }
+            userMarker.openPopup();
+            map.setView([userLat, userLng], 13);
+
+            // ✅ Fill hidden inputs in search form (for controller)
+            const latInput = document.getElementById('latitude');
+            const lngInput = document.getElementById('longitude');
+            if (latInput && lngInput) {
+                latInput.value = userLat;
+                lngInput.value = userLng;
+            }
+
+        }, function() {
+            console.warn("Geolocation blocked or unavailable.");
+        });
+    } else {
+        console.warn("Geolocation not supported by browser.");
     }
+}
 
     // ✅ Use stored session location if available
     if (userLat && userLng) {
@@ -288,6 +300,9 @@ map.on('click', function(e) {
 
     userMarker.openPopup();
     map.setView([userLat, userLng], 13);
+        latInput.value = userLat;
+     lngInput.value = userLng;
+    
 
     pickingLocation = false; // Exit pick mode
     alert("Location updated!");
@@ -516,15 +531,18 @@ document.querySelectorAll("tbody tr").forEach(function(row) {
              const tag = document.createElement("div");
     tag.className = "flex items-center bg-blue-100 text-blue-800 text-sm font-medium px-3 py-1 rounded-full";
 
-    tag.innerHTML = `
-        <form action="{{ route('user.fastSearchGroup') }}" method="GET" class="flex items-center">
-            <input type="hidden" name="search" value="${value}">
-            <button type="submit" class="flex items-center">
-                <span>${value}</span>
-            </button>
-        </form>
-        <button type="button" class="ml-2 text-blue-500 hover:text-blue-700 font-bold">×</button>
-    `;
+   tag.innerHTML = `
+    <form action="{{ route('user.fastSearchGroup') }}" method="GET" class="flex items-center">
+        <input type="hidden" name="search" value="${value}">
+        <input type="hidden" name="latitude" id="group-lat" value="${sessionStorage.getItem('userLat') || ''}">
+        <input type="hidden" name="longitude" id="group-lng" value="${sessionStorage.getItem('userLng') || ''}">
+        <button type="submit" class="flex items-center">
+            <span>${value}</span>
+        </button>
+    </form>
+    <button type="button" class="ml-2 text-blue-500 hover:text-blue-700 font-bold">×</button>
+`;
+
             // Remove tag when x is clicked
             tag.querySelector("button[type='button']").addEventListener("click", () => {
                 // Remove from tags array

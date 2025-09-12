@@ -27,6 +27,10 @@
           Search
         </button>
       </div>
+
+
+      <input type="hidden" id="latitude" name="latitude">
+<input type="hidden" id="longitude" name="longitude">
     </form>
 
     <!-- Image Upload -->
@@ -130,6 +134,9 @@
    
   var map = L.map('map').setView([12.8797, 121.7740], 6); // Default PH view
 
+      const latInput = document.getElementById('latitude');
+    const lngInput = document.getElementById('longitude');
+
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 19,
         attribution: '© OpenStreetMap'
@@ -139,50 +146,67 @@
     var userMarker = null;
     var userLat = sessionStorage.getItem('userLat') ? parseFloat(sessionStorage.getItem('userLat')) : null;
     var userLng = sessionStorage.getItem('userLng') ? parseFloat(sessionStorage.getItem('userLng')) : null;
+function requestUserLocation() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(function(position) {
+            userLat = position.coords.latitude;
+            userLng = position.coords.longitude;
 
-    function requestUserLocation() {
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(function(position) {
-                userLat = position.coords.latitude;
-                userLng = position.coords.longitude;
+            // Save in sessionStorage
+            sessionStorage.setItem('userLat', userLat);
+            sessionStorage.setItem('userLng', userLng);
 
-                // Save in sessionStorage
-                sessionStorage.setItem('userLat', userLat);
-                sessionStorage.setItem('userLng', userLng);
+            // ✅ Update or add user marker on the map
+            if (!userMarker) {
+                userMarker = L.marker([userLat, userLng], {
+                    icon: L.icon({
+                        iconUrl: "https://maps.google.com/mapfiles/ms/icons/green-dot.png",
+                        iconSize: [32, 32]
+                    })
+                }).addTo(map).bindPopup("📍 You are here");
+            } else {
+                userMarker.setLatLng([userLat, userLng]);
+            }
 
-                if (!userMarker) {
-                    userMarker = L.marker([userLat, userLng], {
-                        icon: L.icon({
-                            iconUrl: "https://maps.google.com/mapfiles/ms/icons/green-dot.png",
-                            iconSize: [32, 32]
-                        })
-                    }).addTo(map).bindPopup("📍 You are here");
-                } else {
-                    userMarker.setLatLng([userLat, userLng]);
-                }
+            userMarker.openPopup();
+            map.setView([userLat, userLng], 13);
 
-                userMarker.openPopup();
-                map.setView([userLat, userLng], 13);
-            }, function() {
-                console.warn("Geolocation blocked or unavailable.");
-            });
-        } else {
-            console.warn("Geolocation not supported by browser.");
-        }
-    }
+            // ✅ Fill hidden inputs in search form (for controller)
+            const latInput = document.getElementById('latitude');
+            const lngInput = document.getElementById('longitude');
+            if (latInput && lngInput) {
+                latInput.value = userLat;
+                lngInput.value = userLng;
+            }
 
-    // ✅ Use stored session location if available
-    if (userLat && userLng) {
-        userMarker = L.marker([userLat, userLng], {
-            icon: L.icon({
-                iconUrl: "https://maps.google.com/mapfiles/ms/icons/green-dot.png",
-                iconSize: [32, 32]
-            })
-        }).addTo(map).bindPopup("📍 You are here").openPopup();
-        map.setView([userLat, userLng], 13);
+        }, function() {
+            console.warn("Geolocation blocked or unavailable.");
+        });
     } else {
-        requestUserLocation();
+        console.warn("Geolocation not supported by browser.");
     }
+}
+
+// ✅ Use stored session location if available
+if (userLat && userLng) {
+    userMarker = L.marker([userLat, userLng], {
+        icon: L.icon({
+            iconUrl: "https://maps.google.com/mapfiles/ms/icons/green-dot.png",
+            iconSize: [32, 32]
+        })
+    }).addTo(map).bindPopup("📍 You are here").openPopup();
+    map.setView([userLat, userLng], 13);
+
+    // ✅ Fill hidden inputs from sessionStorage
+
+    if (latInput && lngInput) {
+        latInput.value = userLat;
+        lngInput.value = userLng;
+    }
+} else {
+    requestUserLocation();
+}
+
 
     // ✅ Add store markers from backend
     var stores = @json($stores);
@@ -268,6 +292,9 @@ map.on('click', function(e) {
 
     userMarker.openPopup();
     map.setView([userLat, userLng], 13);
+    latInput.value = userLat;
+     lngInput.value = userLng;
+    
 
     pickingLocation = false; // Exit pick mode
     alert("Location updated!");
