@@ -3,7 +3,7 @@
 use App\Http\Controllers\AuthController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\OpenAIController;
-
+use App\Http\Controllers\UserController;
 
 // Route::post('/ask', [OpenAIController::class, 'ask']);
 // Route::post('/describe-image', [OpenAIController::class, 'describeImage']);
@@ -18,7 +18,7 @@ Route::post('/describe-audioIngredients', [OpenAIController::class, 'describeAud
 Route::post('/registerApi', [AuthController::class, 'registerApi']);
 Route::post('/loginApi', [AuthController::class, 'loginApi']);
 
-
+Route::get('/showMenu', [UserController::class, 'showMenuApi']);
 
 
 Route::middleware('auth:sanctum')->group(function () {

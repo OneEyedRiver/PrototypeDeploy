@@ -225,5 +225,111 @@ public function fastSearchGroup(Request $request)
    // dd($stores);
 }
 
+
+
+
+
+
+
+
+
+   public function showMenuApi(Request $request)
+{
+
+    $categories = Product::select('product_category')->distinct()->get();
+    $cats = $request->get('cat_name');
+    $search = $request->get('search');
+    // $user=Auth::user();
+
+    //  if($user){
+    //      if(!$cats && !$search){
+    // $products = Product::where('seller_id', '!=', Auth::id())->orderByDesc('updated_at')->get()->groupBy('product_category');
+    //  return view('user.menu', [
+    //     'products' => $products,
+    //      'categories'=> $categories
+    // ]);
+    // }else{
+
+    //       if($cats){
+    //  $products = Product::where('product_category', $cats)->where('seller_id', '!=', Auth::id())->orderByDesc('updated_at')->paginate(3);
+    //    return view('user.menu', [
+    //     'products' => $products,
+    //      'categories'=> $categories 
+    // ]);
+    // }elseif($search){
+
+    //    $products = Product::where('product_name', 'like', '%'. $search. '%')->where('seller_id', '!=', Auth::id())->orderByDesc('updated_at')->paginate(3);
+    //    return view('user.menu', [
+    //     'products' => $products,
+    //      'categories'=> $categories
+    // ]);
+
+    // }
+
+
+    // }
+    //  }
+    //  else if(!$user){
+
+if(!$cats && !$search){
+    $products = Product::all()->map(function ($product) {
+        // prepend full URL for product_image
+        $product->product_image = url('storage/' . $product->product_image);
+        return $product;
+    });
+
+    return response()->json([
+        'Status' => 'success',
+        'products' => $products,
+        'categories'=> $categories,
+        'message' => 'Find Successfully'
+    ], 200);
+}
+else{
+if ($cats) {
+    $products = Product::where('product_category', $cats)
+        ->where('seller_id', '!=', Auth::id())
+        ->orderByDesc('updated_at')
+        ->get()
+        ->map(function ($product) {
+            $product->product_image = url('storage/' . $product->product_image);
+            return $product;
+        });
+
+    return response()->json([
+        'Status' => 'success',
+        'products' => $products,
+        'categories' => $categories,
+        'message' => 'Find Successfully'
+    ], 200);
+
+} elseif ($search) {
+    $products = Product::where('product_name', 'like', '%' . $search . '%')
+        ->where('seller_id', '!=', Auth::id())
+        ->orderByDesc('updated_at')
+        ->get()
+        ->map(function ($product) {
+            $product->product_image = url('storage/' . $product->product_image);
+            return $product;
+        });
+
+    return response()->json([
+        'Status' => 'success',
+        'products' => $products,
+        'categories' => $categories,
+        'message' => 'Find Successfully'
+    ], 200);
+}
+
+
+    }
+
+    }
+// }
+
+
+
+
+
 }
 
