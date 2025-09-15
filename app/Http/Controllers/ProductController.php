@@ -192,5 +192,168 @@ else {
     ]);
 
   }}
+  
+
+
+public function storeItemsApi(Request $request)
+{
+    try {
+        // Make product_qty optional
+        $request->validate([
+            'product_name'        => 'required|max:175|min:2',
+            'product_category'    => 'required|max:100',
+            'product_price'       => 'required|numeric|gt:0|max:9999999999',
+            'product_qty'         => 'nullable|numeric|gt:0|max:999999', // changed from required
+            'product_freshness'   => 'required|max:20|min:2',
+            'product_unit'        => 'required|in:kg,pcs',
+            'product_description' => 'nullable|max:2005',
+            'harvest_date'        => 'nullable|date',
+            'deliver_availability'=> 'nullable|boolean',
+            'pick_up_availability'=> 'nullable|boolean',
+            'product_image'       => 'required|image|mimes:jpg,jpeg,png,gif|max:2048',
+        ]);
+
+        // Handle file upload
+        $filePath = null;
+        if ($request->hasFile('product_image')) {
+            $file = $request->file('product_image');
+            $filename = str_replace(' ', '-', strtolower($request->product_name)) . '_' . time() . '.' . $file->getClientOriginalExtension();
+            $filePath = $file->storeAs('product_images', $filename, 'public');
+        }
+
+        // Create product
+        $product = Product::create([
+            'product_name'         => $request->product_name,
+            'product_category'     => $request->product_category,
+            'product_price'        => $request->product_price,
+            'product_unit'         => $request->product_unit,
+            'product_freshness'    => $request->product_freshness,
+           'product_qty' => $request->product_qty ?? 1, // default to 1
+
+            'product_image'        => $filePath,
+            'harvest_date'         => $request->harvest_date,
+            'product_description'  => $request->product_description,
+            'deliver_availability' => $request->deliver_availability ?? 1,
+            'pick_up_availability' => $request->pick_up_availability ?? 1,
+            'seller_id'            => Auth::id(),
+        ]);
+
+        return response()->json([
+            'status'  => 'success',
+            'message' => "The product {$product->product_name} was added successfully.",
+            'product' => $product
+        ], 201);
+
+    } catch (\Illuminate\Validation\ValidationException $e) {
+        return response()->json([
+            'status' => 'error',
+            'errors' => $e->errors()
+        ], 422);
+    } catch (\Exception $e) {
+        return response()->json([
+            'status'  => 'error',
+            'message' => $e->getMessage()
+        ], 500);
+    }
+}
+public function editItemsApi($id)
+{
+    $product = Product::find($id);
+
+    if ($product) {
+        // make sure product_image is a full URL
+        if ($product->product_image) {
+            $product->product_image = url('storage/' . $product->product_image);
+        }
+
+        return response()->json([
+            'Status'  => 'success',
+            'productSingle' => $product
+        ], 200);
+    }
+
+    return response()->json([
+        'Status'  => 'error',
+        'productSingle' => 'Product not found'
+    ], 404);
+}
+
+public function updateItemsApi(Request $request, $id)
+{
+    $product = Product::find($id);
+
+    if (!$product) {
+        return response()->json([
+            'Status' => 'error',
+            'message' => 'Product not found'
+        ], 404);
+    }
+
+    // Validation (image optional here)
+    $request->validate([
+        'product_name' => 'required|max:175|min:2',
+        'product_price' => 'required|numeric|gt:0|max:9999999999',
+        'product_freshness' => 'required|max:20|min:2',
+        'product_description' => 'nullable|max:2005',
+        'product_image' => 'nullable|image|mimes:jpg,jpeg,png,gif|max:2048'
+    ]);
+
+    // If new image uploaded → delete old one & save new
+    if ($request->hasFile('product_image')) {
+        // delete old image
+        if ($product->product_image && file_exists(public_path('storage/' . $product->product_image))) {
+            unlink(public_path('storage/' . $product->product_image));
+        }
+
+        // store new image
+        $filePath = $request->file('product_image')->store('products', 'public');
+        $product->product_image = $filePath;
+    }
+
+    // Update other fields
+    $product->product_name = $request->product_name;
+    $product->product_category = $request->product_category;
+    $product->product_price = $request->product_price;
+    $product->product_unit = $request->product_unit;
+    $product->product_freshness = $request->product_freshness;
+    $product->harvest_date = $request->harvest_date;
+    $product->product_description = $request->product_description;
+    $product->is_available = (int) $request->product_availability;
+
+    $product->save();
+
+    return response()->json([
+        'Status' => 'success',
+        'message' => "The product {$product->product_name} was updated successfully.",
+        'productSingle' => $product,
+        'image_url' => $product->product_image ? asset('storage/' . $product->product_image) : null
+    ], 200);
+}
+
+
+public function destroyItemsApi($id)
+{
+    $product = Product::find($id);
+
+    if (!$product) {
+        return response()->json([
+            'Status' => 'error',
+            'message' => 'Product not found'
+        ], 404);
+    }
+
+    // delete image if exists
+    if ($product->product_image && Storage::disk('public')->exists($product->product_image)) {
+        Storage::disk('public')->delete($product->product_image);
+    }
+
+    // delete product
+    $product->delete();
+
+    return response()->json([
+        'Status' => 'success',
+        'message' => "The product was deleted successfully."
+    ], 200);
+}
 
 }

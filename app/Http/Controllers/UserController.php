@@ -428,5 +428,66 @@ if ($cats) {
 
 
 
+
+
+
+
+
+
+
+public function sellViewApi(Request $request)
+{
+    $user = Auth::user();
+
+    if (!$user) {
+        return response()->json([
+            'Status' => 'error',
+            'message' => 'Unauthorized'
+        ], 401);
+    }
+
+    // If user is NOT a seller → tell Android to redirect
+    if (!$user->is_seller) {
+        return response()->json([
+            'Status' => 'not_seller',
+            'message' => 'User is not a seller. Redirect required.'
+        ], 200);
+    }
+
+    $cats = $request->get('cat_name');
+    $search = $request->get('search');
+
+    $query = Product::where('seller_id', $user->id);
+
+    if ($cats) {
+        $query->where('product_category', $cats);
+    }
+
+    if ($search) {
+        $query->where('product_name', 'like', '%' . $search . '%');
+    }
+
+    $products = $query->orderByDesc('updated_at')->get()->map(function ($product) {
+        // Ensure product_image is always absolute URL
+        if ($product->product_image && !str_starts_with($product->product_image, 'http')) {
+            $product->product_image = asset('storage/' . $product->product_image);
+        }
+        return $product;
+    });
+
+    $categories = Product::where('seller_id', $user->id)
+        ->select('product_category')
+        ->distinct()
+        ->pluck('product_category');
+
+    return response()->json([
+        'Status' => 'success',
+        'user_id' => $user->id,
+        'products' => $products,
+        'categories' => $categories,
+        'message' => 'Find Successfully'
+    ], 200);
 }
 
+
+}

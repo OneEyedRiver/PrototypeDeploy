@@ -7,6 +7,7 @@ use App\Models\User as ModelsUser;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 
 class StoreController extends Controller
 {
@@ -67,4 +68,68 @@ else {
     }
 }
 
+
+
+
+
+
+
+
+
+    public function saveStoreApi(Request $request)
+    {
+        // Validate request
+         $validator = Validator::make($request->all(), [
+        'store_name' => 'required|string|max:255',
+        'store_phoneNumber' => 'nullable|string|min:10|max:20|regex:/^[\d\s\+\-]+$/',
+        'store_address' => 'required|string|max:255',
+        'store_postalCode' => 'required|string|max:20',
+        'store_city' => 'required|string|max:100',
+        'store_state' => 'required|string|max:100',
+        'store_email' => 'required|email|unique:stores,email',
+        'latitude'   => 'required|numeric|between:-90,90',
+        'longitude' => 'required|numeric|between:-180,180',
+    ]);
+
+    if ($validator->fails()) {
+        return response()->json([
+            'status' => 'error',
+            'errors' => $validator->errors()
+        ], 422);
+    }
+        try {
+            // Create the store
+            $store = Store::create([
+                'store_name' => $request->store_name,
+                'seller_id' => Auth::id(),
+                'phone_number' => $request->store_phoneNumber,
+                'email' => $request->store_email,
+                'store_address' => $request->store_address,
+                'postal_code' => $request->store_postalCode,
+                'city' => $request->store_city,
+                'state' => $request->store_state,
+                'latitude' => $request->latitude,
+                'longitude' => $request->longitude
+            ]);
+
+            // Update user as seller
+            $user = ModelsUser::find(Auth::id());
+            if ($user) {
+                $user->update(['is_seller' => 1]);
+            }
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Your store is created',
+                'store' => $store
+            ], 201);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to create store',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
 }

@@ -3,6 +3,8 @@
 use App\Http\Controllers\AuthController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\OpenAIController;
+use App\Http\Controllers\ProductController;
+use App\Http\Controllers\StoreController;
 use App\Http\Controllers\UserController;
 
 // Route::post('/ask', [OpenAIController::class, 'ask']);
@@ -25,4 +27,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/list', function () {
         return \App\Models\User::all();
     });
+
+    Route::get('/sellViewApi', [UserController::class, 'sellViewApi']);
+    Route::post('/products', [ProductController::class, 'storeItemsApi']);
+    Route::get('/getProduct/{id}', [ProductController::class, 'editItemsApi']);
+    Route::post('/updateProduct/{id}', [ProductController::class, 'updateItemsApi']);
+    Route::delete('/deleteProduct/{id}', [ProductController::class, 'destroyItemsApi']);
+    Route::post('/saveStore', [StoreController::class, 'saveStoreApi']);
+
+
 });
