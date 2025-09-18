@@ -132,7 +132,8 @@ class AuthController extends Controller
             'postal_code'=>'max:10|min:5',
             'country'=>'max:50|min:2',
 
-            'phone_number' => 'string|min:10|max:20||unique:users|regex:/^[\d\s\+\-]+$/',
+            'phone_number' => 'required|string|regex:/^09\d{9}$/|unique:users',
+
 
             'password' => ['required', 'confirmed', RulesPassword::min(8)
             ->mixedCase()

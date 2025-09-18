@@ -82,3 +82,4 @@ Route::middleware(['auth', 'is_admin'])
 
 
     });
+Route::get('/check-scheme', fn() => request()->getScheme());

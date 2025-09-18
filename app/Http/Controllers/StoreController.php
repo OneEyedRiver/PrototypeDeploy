@@ -78,18 +78,18 @@ else {
 
     public function saveStoreApi(Request $request)
     {
-        // Validate request
-         $validator = Validator::make($request->all(), [
-        'store_name' => 'required|string|max:255',
-        'store_phoneNumber' => 'nullable|string|min:10|max:20|regex:/^[\d\s\+\-]+$/',
-        'store_address' => 'required|string|max:255',
-        'store_postalCode' => 'required|string|max:20',
-        'store_city' => 'required|string|max:100',
-        'store_state' => 'required|string|max:100',
-        'store_email' => 'required|email|unique:stores,email',
-        'latitude'   => 'required|numeric|between:-90,90',
-        'longitude' => 'required|numeric|between:-180,180',
-    ]);
+      $validator = Validator::make($request->all(), [
+    'store_name'       => 'required|string|max:255',
+    'store_phoneNumber'=> 'nullable|string|regex:/^[0-9+\-\s]{10,20}$/|unique:stores,phone_number',
+    'store_email'      => 'required|email|unique:stores,email',
+    'store_address'    => 'required|string|max:255',
+    'store_postalCode' => 'required|string|max:20',
+    'store_city'       => 'required|string|max:100',
+    'store_state'      => 'required|string|max:100',
+    'latitude'         => 'required|numeric|between:-90,90',
+    'longitude'        => 'required|numeric|between:-180,180',
+]);
+
 
     if ($validator->fails()) {
         return response()->json([
@@ -104,10 +104,12 @@ else {
                 'seller_id' => Auth::id(),
                 'phone_number' => $request->store_phoneNumber,
                 'email' => $request->store_email,
+
                 'store_address' => $request->store_address,
                 'postal_code' => $request->store_postalCode,
                 'city' => $request->store_city,
                 'state' => $request->store_state,
+
                 'latitude' => $request->latitude,
                 'longitude' => $request->longitude
             ]);
