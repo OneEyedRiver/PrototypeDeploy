@@ -6,6 +6,8 @@ use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth; // Optional if you prefer Auth::id()
+use Intervention\Image\Drivers\Gd\Driver;
+use Intervention\Image\ImageManager;
 class ProductController extends Controller
 {
   
@@ -210,15 +212,29 @@ public function storeItemsApi(Request $request)
             'harvest_date'        => 'nullable|date',
             'deliver_availability'=> 'nullable|boolean',
             'pick_up_availability'=> 'nullable|boolean',
-            'product_image'       => 'required|image|mimes:jpg,jpeg,png,gif|max:2048',
+            'product_image'       => 'required|image|mimes:jpg,jpeg,png,gif|max:15000',
         ]);
 
-        // Handle file upload
         $filePath = null;
+
         if ($request->hasFile('product_image')) {
             $file = $request->file('product_image');
-            $filename = str_replace(' ', '-', strtolower($request->product_name)) . '_' . time() . '.' . $file->getClientOriginalExtension();
-            $filePath = $file->storeAs('product_images', $filename, 'public');
+
+            // Normalize filename (always .jpg after compression)
+            $filename = str_replace(' ', '-', strtolower($request->product_name))
+                        . '_' . time() . '.jpg';
+
+            // Initialize Intervention v3 with GD driver
+            $manager = new ImageManager(Driver::class);
+
+            // Read, resize, and compress
+            $image = $manager->read($file)
+                ->scale(width: 1200)   // resize to max width 1200px
+                ->toJpeg(75);          // compress to JPEG, 75% quality
+
+            // Save to storage/app/public/product_images
+            $filePath = 'product_images/' . $filename;
+            Storage::disk('public')->put($filePath, (string) $image);
         }
 
         // Create product
