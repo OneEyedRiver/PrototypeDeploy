@@ -315,14 +315,29 @@ public function updateItemsApi(Request $request, $id)
     ]);
 
     // If new image uploaded → delete old one & save new
+    // If new image uploaded → delete old one & save new (resized & compressed)
     if ($request->hasFile('product_image')) {
-        // delete old image
-        if ($product->product_image && file_exists(public_path('storage/' . $product->product_image))) {
-            unlink(public_path('storage/' . $product->product_image));
+        // Delete old image if exists
+        if ($product->product_image && Storage::disk('public')->exists($product->product_image)) {
+            Storage::disk('public')->delete($product->product_image);
         }
 
-        // store new image
-        $filePath = $request->file('product_image')->store('products', 'public');
+        $file = $request->file('product_image');
+        $filename = str_replace(' ', '-', strtolower($request->product_name))
+                    . '_' . time() . '.jpg';
+
+        // Initialize Intervention Image v3 with GD driver
+        $manager = new ImageManager(Driver::class);
+
+        // Read, resize, compress
+        $image = $manager->read($file)
+            ->scale(width: 1200)   // resize max width
+            ->toJpeg(75);          // compress
+
+        // Save to storage/app/public/product_images
+        $filePath = 'product_images/' . $filename;
+        Storage::disk('public')->put($filePath, (string) $image);
+
         $product->product_image = $filePath;
     }
 
