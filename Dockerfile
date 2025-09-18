@@ -20,11 +20,14 @@ RUN apt-get update && apt-get install -y \
 # Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
+COPY ./uploads.ini /usr/local/etc/php/conf.d/uploads.ini
+
 # Set workdir
 WORKDIR /var/www
 
 # Copy project files
 COPY . .
+
 
 # Laravel dependencies
 RUN composer install --no-interaction --no-dev --optimize-autoloader
