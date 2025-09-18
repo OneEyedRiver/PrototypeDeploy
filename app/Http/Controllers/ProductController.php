@@ -311,7 +311,7 @@ public function updateItemsApi(Request $request, $id)
         'product_price' => 'required|numeric|gt:0|max:9999999999',
         'product_freshness' => 'required|max:20|min:2',
         'product_description' => 'nullable|max:2005',
-        'product_image' => 'nullable|image|mimes:jpg,jpeg,png,gif|max:2048'
+        'product_image' => 'nullable|image|mimes:jpg,jpeg,png,gif|max:15000'
     ]);
 
     // If new image uploaded → delete old one & save new
