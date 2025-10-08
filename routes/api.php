@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ApiController;
 use App\Http\Controllers\AuthController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\OpenAIController;
@@ -34,6 +35,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/updateProduct/{id}', [ProductController::class, 'updateItemsApi']);
     Route::delete('/deleteProduct/{id}', [ProductController::class, 'destroyItemsApi']);
     Route::post('/saveStore', [StoreController::class, 'saveStoreApi']);
-
+    Route::post('/fastSearchApi', [ApiController::class, 'fastSearchApi']);
+    Route::post('/describeUploadedImage_droid', [ApiController::class, 'describeUploadedImage_droid']);
 
 });

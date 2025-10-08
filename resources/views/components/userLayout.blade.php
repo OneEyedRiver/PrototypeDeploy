@@ -10,11 +10,11 @@
 
 
 
-    <link rel="stylesheet" href="{{ secure_asset('leaflet/leaflet.css') }}" />
+    {{-- <link rel="stylesheet" href="{{ secure_asset('leaflet/leaflet.css') }}" />
 <script src="{{ secure_asset('leaflet/leaflet.js') }}"></script>
 
   <link rel="stylesheet" href="{{ secure_asset('build/' . $manifest['resources/css/app.css']['file']) }}">
-    <script type="module" src="{{ secure_asset('build/' . $manifest['resources/js/app.js']['file']) }}"></script> 
+    <script type="module" src="{{ secure_asset('build/' . $manifest['resources/js/app.js']['file']) }}"></script>  --}}
  
 
 
@@ -22,10 +22,10 @@
 
 
 <!-- Leaflet CSS & JS (local) -->
-{{-- <link rel="stylesheet" href="{{ asset('leaflet/leaflet.css') }}" />
+<link rel="stylesheet" href="{{ asset('leaflet/leaflet.css') }}" />
 <script src="{{ asset('leaflet/leaflet.js') }}"></script>
     @vite('resources/css/app.css')
-    @vite('resources/js/app.js') --}}
+    @vite('resources/js/app.js')
 
 
 
