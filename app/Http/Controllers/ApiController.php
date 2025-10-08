@@ -128,6 +128,83 @@ public function describeUploadedImage_droid(Request $request)
     }
 }
 
+public function describeUploadedAudio_droid(Request $request)
+{
+    // 1️⃣ Check if audio exists in request
+    if (!$request->hasFile('audio')) {
+        return response()->json(['error' => 'No audio uploaded'], 400);
+    }
+
+    $audio = $request->file('audio');
+
+    if (!$audio->isValid()) {
+        return response()->json(['error' => 'Invalid audio file'], 400);
+    }
+
+    $audioPath = $audio->getRealPath();
+
+    try {
+        // 2️⃣ Transcribe audio with Whisper
+        $transcription = Http::withHeaders([
+            'Authorization' => 'Bearer ' . env('OPENAI_API_KEY'),
+        ])
+        ->attach(
+            'file',
+            file_get_contents($audioPath),
+            $audio->getClientOriginalName()
+        )
+        ->post('https://api.openai.com/v1/audio/transcriptions', [
+            'model' => 'whisper-1',
+        ]);
+
+        if (!$transcription->successful()) {
+            return response()->json([
+                'error' => 'Transcription failed',
+                'details' => $transcription->json()
+            ], 500);
+        }
+
+        $recognizedText = $transcription->json()['text'] ?? '';
+
+        if (empty($recognizedText)) {
+            return response()->json(['error' => 'No text recognized from audio'], 400);
+        }
+
+        // 3️⃣ Send text to GPT to extract dish name (or description)
+        $response = Http::withHeaders([
+            'Authorization' => 'Bearer ' . env('OPENAI_API_KEY'),
+            'Content-Type'  => 'application/json',
+        ])->post('https://api.openai.com/v1/chat/completions', [
+            'model' => 'gpt-4o-mini',
+            'messages' => [
+                [
+                    'role' => 'system',
+                    'content' => 'You are a chef assistant. Respond ONLY in JSON format like {"dish": "Adobo"} — where "dish" is the name of the dish mentioned in the audio.',
+                ],
+                [
+                    'role' => 'user',
+                    'content' => "Recognized speech: \"$recognizedText\". Extract only the dish name.",
+                ],
+            ],
+        ]);
+
+        if (!$response->successful()) {
+            return response()->json([
+                'error' => 'GPT analysis failed',
+                'details' => $response->json()
+            ], 500);
+        }
+
+        // 4️⃣ Return JSON result
+        return response()->json([
+            'transcription' => $recognizedText,
+            'result' => $response->json(),
+        ]);
+
+    } catch (\Exception $e) {
+        return response()->json(['error' => 'Server error', 'details' => $e->getMessage()], 500);
+    }
+}
 
     
 }
