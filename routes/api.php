@@ -38,7 +38,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/fastSearchApi', [ApiController::class, 'fastSearchApi']);
     Route::post('/describeUploadedImage_droid', [ApiController::class, 'describeUploadedImage_droid']);
     Route::post('/describeUploadedAudio_droid', [ApiController::class, 'describeUploadedAudio_droid']);
-
-
+    Route::post('/describeDish_droid', [ApiController::class, 'describeDish_droid']);
 
 });

@@ -206,5 +206,61 @@ public function describeUploadedAudio_droid(Request $request)
     }
 }
 
+public function describeDish_droid(Request $request)
+{
+    $dish = $request->input('dish');
+
+    if (empty($dish)) {
+        return response()->json([
+            'dish' => 'Unknown',
+            'ingredients' => []
+        ], 400);
+    }
+
+    $response = Http::withHeaders([
+        'Authorization' => 'Bearer ' . env('OPENAI_API_KEY'),
+        'Content-Type' => 'application/json',
+    ])->post('https://api.openai.com/v1/chat/completions', [
+        'model' => 'gpt-4o-mini',
+        'messages' => [
+            [
+                'role' => 'system',
+                'content' => 'You are a culinary AI. Always return JSON only.'
+            ],
+            [
+                'role' => 'user',
+                'content' => "Describe the dish \"$dish\" and return JSON only with this exact structure:\n\n" .
+                             "{\"dish\":\"$dish\",\"ingredients\":[\"ingredient1\",\"ingredient2\",...]}.\n" .
+                             "Return only the main ingredient names (no quantities, no extra text)."
+            ],
+        ],
+    ]);
+
+    $data = $response->json();
+    $answer = $data['choices'][0]['message']['content'] ?? '{}';
+
+    // Parse JSON from GPT response
+    $parsed = json_decode($answer, true);
+
+    // Fallback if GPT response includes text + JSON
+    if (!is_array($parsed) && preg_match('/\{.*\}/s', $answer, $match)) {
+        $parsed = json_decode($match[0], true);
+    }
+
+    // Ensure format
+    if (!is_array($parsed)) {
+        $parsed = ['dish' => $dish, 'ingredients' => []];
+    }
+
+    // Clean ingredients
+    if (isset($parsed['ingredients']) && is_array($parsed['ingredients'])) {
+        $parsed['ingredients'] = array_values(array_unique(array_filter(array_map('trim', $parsed['ingredients']))));
+    } else {
+        $parsed['ingredients'] = [];
+    }
+
+    return response()->json($parsed);
+}
+
     
 }
